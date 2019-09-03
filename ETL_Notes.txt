@@ -1,0 +1,110 @@
+For detailed tutorial about informatica ETL tools : 
+
+https://www.guru99.com/informatica-tutorials.html
+
+======================================================
+
+
+ETL stands for -- “Extract/Transform/Load”.
+
+ETL–Extract Transform Load.
+ETL is all about simply getting data, altering it, then sending it somewhere else.
+
+Extraction – get data from any Source viz. files, database tables, etc.
+Transformation – transform the data obtained from source.
+Load – This transformed data is ready to load anywhere known as Target.
+Almost any type of data store, including web services, Teradata or any SAP solutions can be termed as a Source and Target.
+
+Informatica ETL tool consists of following services & components:
+-------------------------
+1.Repository Service – Responsible for maintaining Informatica metadata & providing access of same to other services.
+2.Integration Service – Responsible for the movement of data from sources to targets
+3.Reporting Service - Enables the generation of reports
+4.Nodes – Computing platform where the above services are executed
+5.Informatica Designer - Used for creation of mappings between source and target
+6.Workflow Manager – Used to create workflows and other task & their execution
+7.Workflow Monitor – Used to monitor the execution of workflows
+8.Repository Manager – Used to manage objects in repository
+
+======================================================
+In this tutorial- you will learn :-
+
+Informatica Domain
+
+PowerCenter Repository
+
+Domain Configuration
+
+Properties of the domain
+
+Powercenter client & Server Connectivity
+
+Repository Service
+
+Integration Service
+
+Sources & Targets
+=======================================================
+
+In these tutorials, we will cover topics such as Informatica basics, Informatica Architecture, 
+Router Transformations, Source Qualifier Transformations and Informatica PowerCenter Installation etc.
+
+Informatica Introduction
+Knowledge Base
+------------------
+Informatica Concepts :
+Rank Transformation In Informatica
+Informatica in Data Warehouse
+ETL Project Architecture in Informatica
+Informatica Interview Questions & Answers
+Informatica Data Quality Tutorial
+Informatica ILM Tutorial
+Event Wait Event Rise In Informatica
+Informatica MDM Tutorial
+Informatica Data Quality Interview Questions
+Aggregator Transformation In Informatica
+Sorter Transformation In Informatica
+Lookup Transformation In Informatica With Examples
+Informatica Transformations – Data Ware Houses
+
+What is Informatica Tool?
+Informatica is a data integration/ETL tool. It gathers data from various sources and 
+loads it into distinctive targets. It just moves data from one place to another,
+but does not store anything. Informatica utilizes a service oriented architecture, 
+that carries the ability to promote services and resources over various machines.
+
+What is Informatica?
+Imagine going through thousands of lines of stored procedures when visually debugging 
+a few mappings is handy.
+
+To overcome the problem, Informatica technology and its tools provide monitoring features 
+and a UI for building a logic and out of the box connectivity to multiple sources and targets.
+
+Another advantage is when you make complex aggregations or joins, 
+you can use the power of the ETL server to buffer the data rather than the burdening 
+your database that can be utilized for reporting/Analytics.
+
+
+What are ETL tools used for?
+ETL stands for “Extract/Transform/Load”.
+ETL tools are unique and incomparable. The action of Extracting, Transforming, 
+and Loading significant data into the data warehouse is organized and evaluated for 
+substantial business intelligence that governs the success of business policies.
+
+
+What is mapping?
+A mapping is a collection of source and target objects linked together by a set of transformations. These transformations consist of a set of rules, which define the data flow and how the data is loaded into the targets. 
+
+
+What is Debugger?
+Debugger is a very handy utility in Informatica. When we execute the mapping, Informatica executes the mapping based on the transformation logic defined.
+
+Its execution is similar to batch mode execution where we cannot see the intermediate results, or how the data is getting modified from transformation to transformation.
+
+Many a times we get the data in the target which is not as we expected. With the help of debugger, we can analyze how the data is moving within the mapping. We can analyze the data row by row in a debugger.
+
+
+
+
+
+
