@@ -1,0 +1,111 @@
+
+Data Merge:
+
+There are two databases called R1 and R2.
+Now, we are merging this two databases into one database which is called merge database (R3).
+
+1st Step: Technical Merge :
+==========================
+
+Here, R2 is the source database and R1 is our target database.
+Using ETL transformations, we are loading the data from R2 into R1.
+
+In detailed, we are changing the primary keys in R2 (tables) and loading the data into R1 tables. (To avoid primary key constraint issue.)
+Ex:  Let say, in R2 concernrole table priamry key column have the value of 12345 and in the R1 concernrole table priamry key column have the same value of 12345, 
+then we will get an error (primary key constraint).
+To avoid this we are using the formula in R2 tables, so it will change the value of 12345 in R2 to some different number...  in this way we are going to avoid the error..
+
+/* Source query (We applied this formula for all the keys where key length is more than 9 numbers)
+case when LENGTH(CONCERNROLEID)<=9 THEN CONCERNROLEID
+ WHEN LENGTH(CONCERNROLEID)=20 OR ( CONCERNROLEID )>=9223372036854775807 THEN TO_NUMBER(SUBSTR(CONCERNROLEID,1,6)||REVERSE(SUBSTR(CONCERNROLEID,7)))
+ else 
+TO_NUMBER(SUBSTR(CONCERNROLEID,1,2)||REVERSE(SUBSTR(CONCERNROLEID,3))) end as CONCERNROLEID, 
+
+Update Query:
+update CONCERNROLE set CONCERNROLEID='-8'||substr(CONCERNROLEID,3) where CONCERNROLEID>=9223372036854775807 or CONCERNROLEID < -9223372036854775808 ;
+
+*/
+
+For Regular columns we used the above process, but for column values like XML_value, BLOB_data-value and etc... y anna did the query... 
+For Example, look into ADDRESS table (mapping) ADDRESSDATA column have XML value..  
+
+
+
+
+2nd Step: Person Merge :
+=======================
+ 
+Before starting a person merge we created table called CONCERNROLEDUPLICATE where all the DUPLICATE PERSONS present in the merge database will load the data into this table..
+Note: DUPLICATE PERSONS - persons who are enrolled or getting benefits in both the R1 and R2. 
+Here, R1 person is the original person (originalconcernroleid column in CONCERNROLEDUPLICATE table) 
+and R2 person is marked as a duplicate person ( DUPLICATECONCERNROLEID column in CONCERNROLEDUPLICATE table ).
+
+In Person merge, Concernroleduplicate table always Source and all other tables in which the concernroleid column is present are the target.
+-- First we are loading all the duplicate records into Concernroleduplicate table by using below query and 
+then by using Concernroleduplicate table we are updating the all R2 concernroleid (in Merged Database (R3))
+(Duplicateconcernorleid column in concernroleduplicate table) columns in all target tables (in which the concernroleid column is present are called target tables)
+with ORIGINALCONCERNROLEID in CONCERNROLEDUPLICATE table (R1 concernroleid).
+
+
+
+/* ConcernroleDuplicate table query. (We are using this query to get all the duplicate records present in Merged Database (R3) and load into concernroleduplicate table).
+
+SELECT DISTINCT PARTICIPANTROLEID,R2_PARTICIPANTROLEID FROM (select CP.PARTICIPANTROLEID,CH.CASEID,CA.ALTERNATEID from caseheader CH
+ INNER JOIN caseparticipantrole CP
+ ON CP.CASEID=CH.CASEID AND CP.TYPECODE IN ('PRI','MEM') AND RECORDSTATUS='RST1'
+ LEFT JOIN CONCERNROLEALTERNATEID CA
+ ON CA.CONCERNROLEID=CP.PARTICIPANTROLEID AND CA.TYPECODE='CA45000' AND CA.STATUSCODE='RST1' AND (CA.ENDDATE>=TRUNC(SYSDATE) OR CA.ENDDATE IS NULL)
+ where CH.casetypecode='CT5'  AND CH.INTEGRATEDCASETYPE IN ('CT26301','CT26400') AND CA.ALTERNATEID  IS NOT NULL) R1
+ INNER JOIN 
+(select CP.PARTICIPANTROLEID AS R2_PARTICIPANTROLEID,CH.CASEID AS R2_CASEID,CA.ALTERNATEID AS R2_CLIENTID from caseheader CH
+ INNER JOIN caseparticipantrole CP
+ ON CP.CASEID=CH.CASEID AND CP.TYPECODE IN ('PRI','MEM') AND RECORDSTATUS='RST1'
+ LEFT JOIN CONCERNROLEALTERNATEID CA
+ ON CA.CONCERNROLEID=CP.PARTICIPANTROLEID AND CA.TYPECODE='CA45000' AND CA.STATUSCODE='RST1' AND (CA.ENDDATE>=TRUNC(SYSDATE) OR CA.ENDDATE IS NULL)
+ where CH.casetypecode='CT5'  AND CH.INTEGRATEDCASETYPE='PC4000' AND CA.ALTERNATEID  IS NOT NULL)
+ R2
+ ON R2.R2_CLIENTID=R1.ALTERNATEID;
+ 
+ */
+
+
+In person merge, we are updating the keys R2 Primary keys (DUPLICATECONCERNROLEID) with R1 Primary keys(originalconcernroleid).
+
+Example: A person (shane watson) with concernroleid = 12345 in R2, and same person (shane watson) in R1 has concernroleid=6789.
+Here, we are replacing the R2 concernroleid=12345 with R1 concernroleid = 6789.
+Then both the R1 and R2 concernroleid became same 6789, in this way persons marked as a duplicate (In application).
+
+/*
+SELECT CND.ORIGINALCONCERNROLEID, E.EMPLOYMENTID FROM 
+ CONCERNROLEDUPLICATE CND
+ INNER JOIN EMPLOYMENT E
+ ON E.CONCERNROLEID = CND.DUPLICATECONCERNROLEID
+ WHERE DUPLICATEUSER='SYSTEM'; 
+*/
+
+
+3rd Evidence Merge:
+===================
+
+Duplicate Person:
+------------------
+Here, R2 marked as a duplciate person where R1 as a original person.
+In Duplicate Person there is only person level evidences are present(Address, SSN, phone number, emailaddress will not be part of this, it will be moved to Original person.).
+But, there is no IC cases and PDC cases it will be moved to Original person.
+
+Original Person:
+----------------
+Here, R1 person is original person where R2 marked as a duplicate person.
+In original person,  person level evidenes (Address, SSN, phone number, emailaddress) from R2 (Duplicate person) will be moved here, 
+here we can see both the R1 and R2(original person and duplciate person) person level evidences here ( Address, SSN, phone number, emailaddress - evidences from R2 Duplicate person).
+In original person, we can see both the R1 and R2 IC cases and PDC cases here.
+
+
+In specific with address and ssn evidence:
+------------------------------------------
+In original person, person level All the ADDRESSES (For both the AT1 and AT4), SSN, PHONE-NUMBER AND EMAILADDRESS evidences should be closed with (SYSDATE-1) and Start with SYSDATE.
+And IC_level Addresses Evidence should be closed with SYSDATE-1 and Start with SYDATE (For both the AT1 and AT4).
+And IC level SSN, emailaddress, phone_number evidence will not close or start.
+
+
+
